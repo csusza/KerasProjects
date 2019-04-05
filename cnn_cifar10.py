@@ -1,3 +1,10 @@
+'''
+#Train a simple deep CNN on the CIFAR10 small images dataset.
+
+It gets to 77% validation accuracy in 50 epochs.
+'''
+
+
 from __future__ import print_function
 import keras
 from keras.datasets import cifar10
@@ -28,6 +35,7 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+# Setting up the network
 model = Sequential()
 model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='same', input_shape=x_train.shape[1:]))
 model.add(Activation('relu'))

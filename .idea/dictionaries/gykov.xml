@@ -1,7 +1,9 @@
 <component name="ProjectDictionaryState">
   <dictionary name="gykov">
     <words>
+      <w>cifar</w>
       <w>crossentropy</w>
+      <w>keras</w>
       <w>relu</w>
       <w>softmax</w>
     </words>
