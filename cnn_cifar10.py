@@ -37,25 +37,21 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 
 # Setting up the network
 model = Sequential()
-model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='same', input_shape=x_train.shape[1:]))
-model.add(Activation('relu'))
-model.add(Conv2D(filters=32, kernel_size=(3, 3)))
-model.add(Activation('relu'))
+model.add(Conv2D(filters=32, kernel_size=(3, 3), padding='same', input_shape=x_train.shape[1:], activation='relu'))
+model.add(Conv2D(filters=32, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(rate=0.2))
 
-model.add(Conv2D(filters=64, kernel_size=(3, 3), padding='same'))
-model.add(Activation('relu'))
-model.add(Conv2D(filters=64, kernel_size=(3, 3)))
-model.add(Activation('relu'))
+model.add(Conv2D(filters=64, kernel_size=(3, 3), padding='same', activation='relu'))
+model.add(Conv2D(filters=64, kernel_size=(3, 3), activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 model.add(Dropout(rate=0.2))
 
 model.add(Flatten())
-model.add(Dense(units=512))
-model.add(Activation('relu'))
+model.add(Dense(units=512, activation='relu'))
 model.add(Dropout(rate=0.4))
-model.add(Dense(units=num_classes, activation='softmax'))
+model.add(Dense(units=num_classes))
+model.add(Activation('softmax'))
 
 # Initiate SGD optimizer
 opt = keras.optimizers.SGD(lr=learning_rate, momentum=0.0, decay=0.0, nesterov=False)
