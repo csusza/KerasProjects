@@ -5,7 +5,7 @@ from pathlib import Path
 import keras
 from keras.models import Sequential
 from keras.layers import Dropout, Flatten, Conv2D, MaxPooling2D, Dense, Activation
-from keras.callbacks import Callback, EarlyStopping
+from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
 from keras import backend as K
 import matplotlib.pyplot as plt
 K.set_image_data_format('channels_first')
@@ -13,6 +13,7 @@ K.set_image_data_format('channels_first')
 
 TRAIN_PATH = Path.cwd() / 'cad_pictures' / 'train'
 TEST_PATH = Path.cwd() / 'cad_pictures' / 'test'
+MODEL_PATH = Path.cwd() / 'saved_models'
 
 
 ROWS = COLS = 128
@@ -28,9 +29,9 @@ train_cats = np.array([TRAIN_PATH / i for i in os.listdir(TRAIN_PATH) if 'cat' i
 train_dogs = np.array([TRAIN_PATH / i for i in os.listdir(TRAIN_PATH) if 'dog' in i])
 
 # Subsample the inputs
-train_images = np.append(train_cats[:5000], train_dogs[:5000])
+train_images = np.append(train_cats[:2500], train_dogs[:2500])
 np.random.shuffle(train_images)
-test_images = test_images[:1000]
+test_images = test_images[:500]
 print(train_images.shape)
 print(test_images.shape)
 
@@ -108,8 +109,9 @@ def catdog():
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
-    opt = keras.optimizers.SGD(lr=learning_rate, momentum=0.0, decay=0.0001, nesterov=False)
-    model.compile(loss='binary_crossentropy', optimizer=opt, metrics=['accuracy'])
+    SGD = keras.optimizers.SGD(lr=learning_rate, momentum=0.0, decay=0.0001, nesterov=False)
+    Adam = keras.optimizers.Adam(lr=learning_rate, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+    model.compile(loss='binary_crossentropy', optimizer=Adam, metrics=['accuracy'])
     print(model.summary())
     return model
 
@@ -129,21 +131,21 @@ class LossHistory(Callback):
 
 
 early_stopping = EarlyStopping(monitor='val_loss', patience=16, verbose=1, mode='auto')
+check_path = MODEL_PATH / 'cats_and_dogs.hdf5'
+checkpoint = ModelCheckpoint(os.fspath(check_path), monitor='val_acc', verbose=1, save_best_only=True, mode='auto')
+
 
 def run_catdog():
     history = LossHistory()
-    model.fit(train, labels, batch_size=batch_size, epochs=nb_epoch, validation_split=0.20,
-              verbose=0, shuffle=True, callbacks=[history, early_stopping])
+    model.fit(train, labels, batch_size=batch_size, epochs=nb_epoch, validation_split=0.10,
+              verbose=1, shuffle=True, callbacks=[history, early_stopping, checkpoint])
 
-    predictions = model.predict(test, verbose=0)
+    predictions = model.predict(test, verbose=1)
     return predictions, history
 
 
 predictions, history = run_catdog()
 
-
-model.fit(train, labels, batch_size=batch_size, epochs=nb_epoch, validation_split=0.25, verbose=1, shuffle=True)
-predictions = model.predict(test, verbose=0)
 
 loss = history.losses
 val_loss = history.val_losses
